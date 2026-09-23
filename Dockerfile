@@ -14,6 +14,9 @@ RUN mkdir -p /root/.dsh/profiles/web && \
 # Telegram bridge plugin (polling mode, outbound only)
 RUN dsh plugin --profile web add github:hi-wenw/dsh-telegram-channel
 
+# Profile references this plugin but the npm dep list lags — install explicitly
+RUN cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
+
 WORKDIR /root
 
 EXPOSE 3080
