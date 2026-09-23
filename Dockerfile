@@ -29,10 +29,10 @@ llm-pi-ai:
       api: openai-completions
       baseURL: https://ollama.com/v1
       models:
-        - id: glm5.3
-        - id: glm5.3-flash
+        - id: glm-5.3
+        - id: glm-5.3-flash
         - id: deepseek-v4.1-flash
-        - id: k3
+        - id: kimi-k3
 EOF
 
 WORKDIR /root
