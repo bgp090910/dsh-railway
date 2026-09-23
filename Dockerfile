@@ -1,6 +1,6 @@
 FROM node:22-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates socat \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g pnpm @deepseek-ai/dsh@0.1.5-rc.2
@@ -22,5 +22,5 @@ RUN cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='packa
 
 WORKDIR /root
 
-EXPOSE 3080
-CMD ["dsh", "web", "--no-open"]
+EXPOSE 3080 8080
+CMD ["sh", "-c", "socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 & exec dsh web --no-open"]
