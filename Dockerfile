@@ -3,7 +3,7 @@ FROM node:22-slim
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g pnpm @deepseek-ai/dsh
+RUN npm install -g pnpm @deepseek-ai/dsh@0.1.5-rc.2
 
 # Allow the git-hosted plugin's build step (pnpm allowBuilds requirement)
 RUN mkdir -p /root/.dsh/profiles/web && \
