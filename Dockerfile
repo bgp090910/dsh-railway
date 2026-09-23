@@ -20,6 +20,21 @@ RUN cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-
 # Production has no Cordis HMR service: switch patchReload from "live" to "startup"
 RUN cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
 
+# Ollama Cloud as a custom provider (OpenAI-completions compatible)
+RUN mkdir -p /root/.dsh && cat > /root/.dsh/settings.yaml <<'EOF'
+llm-pi-ai:
+  providers:
+    ollama-cloud:
+      apiKeyEnv: OLLAMA_API_KEY
+      api: openai-completions
+      baseURL: https://ollama.com/v1
+      models:
+        - id: glm5.3
+        - id: glm5.3-flash
+        - id: deepseek-v4.1-flash
+        - id: k3
+EOF
+
 WORKDIR /root
 
 EXPOSE 3080 8080
