@@ -23,4 +23,4 @@ RUN cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='packa
 WORKDIR /root
 
 EXPOSE 3080 8080
-CMD ["sh", "-c", "socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 & exec dsh web --no-open"]
+CMD ["sh", "-c", "socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 & exec dsh web --no-open --trusted-host dsh-production-1e87.up.railway.app"]
