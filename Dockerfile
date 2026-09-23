@@ -17,6 +17,9 @@ RUN dsh plugin --profile web add github:hi-wenw/dsh-telegram-channel
 # Profile references this plugin but the npm dep list lags — install explicitly
 RUN cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
+# Production has no Cordis HMR service: switch patchReload from "live" to "startup"
+RUN cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
+
 WORKDIR /root
 
 EXPOSE 3080
