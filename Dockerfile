@@ -14,6 +14,9 @@ RUN mkdir -p /root/.dsh/profiles/web && \
 # Telegram bridge plugin (polling mode, outbound only)
 RUN dsh plugin --profile web add github:hi-wenw/dsh-telegram-channel
 
+# dsh-purge jailbreak plugin (auto-apply on start per its cordis.patch.yml)
+RUN dsh plugin --profile web add https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz
+
 # Profile references this plugin but the npm dep list lags — install explicitly
 RUN cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
