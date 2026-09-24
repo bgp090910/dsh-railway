@@ -5,14 +5,15 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v1
+MARKER=/root/.dsh/.booted-v2
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
   echo "=== first boot: bootstrapping persistent dsh home ==="
   mkdir -p /root/.dsh/profiles/web
 
-  # pnpm allowBuilds + override for unpublished dsh-type-meta
+  # allow ALL builds (pnpm 11+ blocks git-plugin prepare scripts by default)
+  printf "dangerously-allow-all-builds=true\n" > /root/.dsh/profiles/web/.npmrc
   printf "allowBuilds:\n  'dsh-telegram-channel@git+https://github.com/hi-wenw/dsh-telegram-channel.git': true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" \
     > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
