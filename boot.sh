@@ -5,15 +5,15 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v5
+MARKER=/root/.dsh/.booted-v6
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
   echo "=== first boot: bootstrapping persistent dsh home ==="
   mkdir -p /root/.dsh/profiles/web
 
-  # allow ALL package builds (pnpm 11+ blocks git-plugin prepare scripts)
-  printf "allowBuilds:\n  '*': true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" \
+  # allow ALL scoped package builds (pnpm 11+ blocks git-plugin prepare scripts)
+  printf "allowBuilds:\n  '@*/*': true\n  '*': true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" \
     > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
   # missing sandbox plugin referenced by the web profile
