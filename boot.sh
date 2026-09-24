@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v40
+MARKER=/root/.dsh/.booted-v41
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -16,13 +16,23 @@ if [ ! -f "$MARKER" ]; then
 
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
 
-  # Profile patch: only the default model (plugin entries come from their
-  # own bundle patches; duplicates here would crash the loader)
+  # Profile patch: default model + notifier channels (telegram)
   cat > /root/.dsh/profiles/web/cordis.patch.yml <<'EOF'
 - id: agent-default-model
   config:
     provider: ollama-cloud
     model: deepseek-v4.1-flash
+- id: dsh-notifier
+  config:
+    enabled: true
+    debounceMs: 10000
+    summaryMaxChars: 500
+    channels:
+      - type: telegram
+        botToken: "${ENV:TELEGRAM_BOT_TOKEN}"
+        chatId: "7906946450"
+    admin:
+      enabled: true
 EOF
   echo "MANUAL_PATCH_WRITTEN"
 
