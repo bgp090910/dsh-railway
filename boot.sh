@@ -101,5 +101,25 @@ cat > /root/.dsh/workspace/.pi/telegram.json <<'EOF'
 EOF
 echo "TELEGRAM_CFG_READY"
 
+# strip stale plugin references from profile bundles (fixes boot crash)
+node -e '
+const fs = require("fs");
+const p = "/root/.dsh/profiles/web/package.json";
+const j = JSON.parse(fs.readFileSync(p, "utf8"));
+const BAD = ["@kanadego/dsh-heartbeat", "@kenz1117/dsh-engram", "@hi-wenw/dsh-telegram-channel", "@bycall/dsh-answer-reviewer"];
+if (j.dsh && j.dsh.profile && Array.isArray(j.dsh.profile.bundles)) {
+  const before = j.dsh.profile.bundles.length;
+  j.dsh.profile.bundles = j.dsh.profile.bundles.filter((b) => !BAD.includes(b));
+  if (j.dsh.profile.bundles.length !== before) {
+    fs.writeFileSync(p, JSON.stringify(j, null, 2));
+    console.log("BUNDLES_CLEANED");
+  } else {
+    console.log("BUNDLES_OK");
+  }
+} else {
+  console.log("NO_BUNDLES_FIELD");
+}
+'
+
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
