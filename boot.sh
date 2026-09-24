@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v13
+MARKER=/root/.dsh/.booted-v15
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -23,7 +23,9 @@ if [ ! -f "$MARKER" ]; then
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
   # Telegram native bridge: direct chat, auto session binding (no manual attach)
-  "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
+  # use GitHub main (0.4.0, aligned with dsh 0.1.5-rc) — npm 0.2.0 is stale
+  "$DSH" plugin --profile web remove dsh-telegram || true
+  "$DSH" plugin --profile web add github:xqicxx/dsh-telegram --allow-build='*' || true
 
   # remove the old remote-control style plugin
   "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
