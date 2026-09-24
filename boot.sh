@@ -134,5 +134,13 @@ fi
 
 # (inject fix for dsh-telegram removed — plugin reverted to telegram-channel)
 
+# ensure dsh-purge entries exist in the profile patch (tar.gz installs lose them on rebuild)
+PATCH=/root/.dsh/profiles/web/cordis.patch.yml
+if ! grep -q "id: dsh-purge" "$PATCH"; then
+  printf '\n- id: system-prompt\n  config:\n    includeHarnessIdentity: false\n    personaPrefix: ""\n    personaSuffix: Your working directory is {{cwd}}.\n' >> "$PATCH"
+  printf '\n- insert:\n    - id: dsh-purge\n      name: dsh-purge\n      config:\n        enabled: true\n        autoApplyOnStart: true\n        autoUpdateOnStart: true\n        autoRevertOnMissing: false\n        injectOnce: false\n        stripMnemon: true\n        verbose: false\n        postPrompt: ""\n        postPromptOrder: 5100\n        autoRetry: true\n        retryMax: 3\n        autoContinue: true\n        continueMax: 3\n        continueText: "继续"\n' >> "$PATCH"
+  echo "PURGE_PATCH_RESTORED"
+fi
+
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
