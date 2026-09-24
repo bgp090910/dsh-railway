@@ -1,6 +1,6 @@
 FROM node:22-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates socat \
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates socat python3 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g pnpm @deepseek-ai/dsh@0.1.5-rc.2
