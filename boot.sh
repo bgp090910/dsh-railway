@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v35
+MARKER=/root/.dsh/.booted-v36
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
