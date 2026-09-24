@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v11
+MARKER=/root/.dsh/.booted-v12
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -44,6 +44,10 @@ if [ ! -f "$MARKER" ]; then
   "$DSH" plugin --profile web remove github:bycall/dsh-answer-reviewer || true
   "$DSH" plugin --profile web remove github:Kanadego/dsh-heartbeat || true
   "$DSH" plugin --profile web remove github:kenz1117/dsh-engram || true
+  # hard-clean leftover node_modules so dsh stops seeing fake workspaces
+  cd /root/.dsh/profiles/web && pnpm remove @kanadego/dsh-heartbeat @kenz1117/dsh-engram 2>/dev/null || true
+  rm -rf node_modules/.pnpm/*heartbeat* node_modules/.pnpm/*engram* 2>/dev/null || true
+  echo "RESIDUE_CLEANED"
 
   # production: patchReload startup (no HMR)
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
