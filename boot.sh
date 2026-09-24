@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v36
+MARKER=/root/.dsh/.booted-v37
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -16,36 +16,9 @@ if [ ! -f "$MARKER" ]; then
 
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
 
-  # MANUALLY write clean cordis.patch.yml (dsh's reconcile concat bug)
+  # Profile patch: only the default model (plugin entries come from their
+  # own bundle patches; duplicates here would crash the loader)
   cat > /root/.dsh/profiles/web/cordis.patch.yml <<'EOF'
-- id: system-prompt
-  config:
-    includeHarnessIdentity: false
-    personaPrefix: ""
-    personaSuffix: Your working directory is {{cwd}}.
-- insert:
-    - id: dsh-telegram-channel
-      name: dsh-telegram-channel
-      inject:
-        - session
-- insert:
-    - id: dsh-purge
-      name: dsh-purge
-      config:
-        enabled: true
-        autoApplyOnStart: true
-        autoUpdateOnStart: true
-        autoRevertOnMissing: false
-        injectOnce: false
-        stripMnemon: true
-        verbose: false
-        postPrompt: ""
-        postPromptOrder: 5100
-        autoRetry: true
-        retryMax: 3
-        autoContinue: true
-        continueMax: 3
-        continueText: "继续"
 - id: agent-default-model
   config:
     provider: ollama-cloud
