@@ -164,11 +164,12 @@ if ! grep -q "id: dsh-purge" "$PATCH"; then
   echo "PURGE_PATCH_RESTORED"
 fi
 
-# telegram-channel needs apiProxy injected for /model (dsh 0.1.5-rc seam)
+# telegram-channel waits forever on apiProxy (removed seam in dsh 0.1.5-rc)
+# strip the inject line so the plugin activates; /model falls back gracefully
 TB=/root/.dsh/profiles/web/node_modules/dsh-telegram-channel/cordis.patch.yml
-if [ -f "$TB" ] && ! grep -q "apiProxy" "$TB"; then
-  sed -i '/      name: dsh-telegram-channel/a\      inject:\n        - apiProxy' "$TB"
-  echo "APIPROXY_INJECT_FIXED"
+if [ -f "$TB" ]; then
+  sed -i '/apiProxy/d' "$TB"
+  echo "APIPROXY_INJECT_REMOVED"
 fi
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
