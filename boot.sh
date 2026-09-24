@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v12
+MARKER=/root/.dsh/.booted-v13
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -22,8 +22,14 @@ if [ ! -f "$MARKER" ]; then
   # missing sandbox plugin referenced by the web profile
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
-  # Telegram bridge (polling)
-  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel --allow-build='*' || true
+  # Telegram native bridge: direct chat, auto session binding (no manual attach)
+  "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
+
+  # remove the old remote-control style plugin
+  "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
+  cd /root/.dsh/profiles/web && pnpm remove @hi-wenw/dsh-telegram-channel 2>/dev/null || true
+  rm -rf node_modules/.pnpm/*telegram-channel* 2>/dev/null || true
+  echo "TELEGRAM_PLUGIN_SWAPPED"
 
   # dsh-purge jailbreak plugin
   "$DSH" plugin --profile web add https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz --allow-build='*' || true
@@ -82,6 +88,18 @@ if ! grep -q "agent-default-model" "$PATCH"; then
   printf '\n- id: agent-default-model\n  config:\n    provider: ollama-cloud\n    model: deepseek-v4.1-flash\n' >> "$PATCH"
   echo "DEFAULT_MODEL_ADDED"
 fi
+
+# Telegram plugin config: whitelist + auto-start (workspace .pi/telegram.json)
+mkdir -p /root/.dsh/workspace/.pi
+cat > /root/.dsh/workspace/.pi/telegram.json <<'EOF'
+{
+  "security": { "allowedChatIds": [7906946450, 8549963548] },
+  "watch": { "autoStart": true },
+  "outbound": { "liveFeed": true },
+  "interactive": { "userQuestions": "both" }
+}
+EOF
+echo "TELEGRAM_CFG_READY"
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
