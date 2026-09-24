@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v19
+MARKER=/root/.dsh/.booted-v23
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -21,6 +21,9 @@ if [ ! -f "$MARKER" ]; then
 
   # missing sandbox plugin referenced by the web profile
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
+
+  # apiProxy host service (telegram-channel waits on it; missing from profile deps)
+  cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-host-apiproxy@0.1.5-rc.2 || true
 
   # Telegram bridge (remote-control style — the only plugin verified working
   # in this container; dsh-telegram fails activation on dsh 0.1.5-rc seam)
