@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v23
+MARKER=/root/.dsh/.booted-v24
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -25,11 +25,11 @@ if [ ! -f "$MARKER" ]; then
   # apiProxy host service (telegram-channel waits on it; missing from profile deps)
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-host-apiproxy@0.1.5-rc.2 || true
 
-  # Telegram bridge (remote-control style — the only plugin verified working
-  # in this container; dsh-telegram fails activation on dsh 0.1.5-rc seam)
+  # Telegram bridge (remote-control style) — v0.2.3: pre-apiProxy version
+  # (0.3.x requires apiProxy seam that dsh 0.1.5-rc.2 removed)
   "$DSH" plugin --profile web remove dsh-telegram || true
   rm -rf /root/.dsh/dsh-telegram-src
-  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel --allow-build='*' || true
+  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel.git#v0.2.3 --allow-build='*' || true
 
   # remove the old remote-control style plugin
   "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
