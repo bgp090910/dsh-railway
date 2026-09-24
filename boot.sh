@@ -55,7 +55,7 @@ if [ ! -f "$MARKER" ]; then
   "$DSH" plugin --profile web remove github:kenz1117/dsh-engram || true
   # hard-clean leftover node_modules so dsh stops seeing fake workspaces
   cd /root/.dsh/profiles/web && pnpm remove @kanadego/dsh-heartbeat @kenz1117/dsh-engram 2>/dev/null || true
-  rm -rf node_modules/.pnpm/*heartbeat* node_modules/.pnpm/*engram* 2>/dev/null || true
+  rm -rf node_modules/.pnpm/*heartbeat* node_modules/.pnpm/*engram* node_modules/.pnpm/*answer-reviewer* 2>/dev/null || true
   echo "RESIDUE_CLEANED"
 
   # production: patchReload startup (no HMR)

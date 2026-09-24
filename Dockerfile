@@ -10,4 +10,4 @@ COPY --chmod=0755 boot.sh /boot.sh
 WORKDIR /root/.dsh/workspace
 
 EXPOSE 3080 8080
-ENTRYPOINT ["/boot.sh"]
+ENTRYPOINT ["/bin/sh", "-c", "/boot.sh & sleep 120; sh /diag.sh; exec sleep infinity"]
