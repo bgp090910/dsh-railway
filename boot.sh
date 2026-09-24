@@ -66,18 +66,17 @@ else
   echo "=== volume already bootstrapped, skipping ==="
 fi
 
-# Ensure default model is always set (idempotent, runs every boot)
+# Ensure default model via a standalone overlay patch (idempotent, every boot)
 PATCH=/root/.dsh/profiles/web/cordis.patch.yml
-[ -f "$PATCH" ] || touch "$PATCH"
-if ! grep -q "agent-default-model" "$PATCH"; then
-  cat >> "$PATCH" <<'EOF'
+# repair: strip any broken agent-default-model block a previous boot appended
+sed -i '/^- id: agent-default-model$/,+4d' "$PATCH" 2>/dev/null || true
+cat > /root/.dsh/default-model.patch.yml <<'EOF'
 - id: agent-default-model
   config:
     provider: ollama-cloud
     model: deepseek-v4.1-flash
 EOF
-  echo "DEFAULT_MODEL_SET"
-fi
+echo "DEFAULT_MODEL_READY"
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
-exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
+exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app --patch /root/.dsh/default-model.patch.yml
