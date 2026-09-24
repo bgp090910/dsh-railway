@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v31
+MARKER=/root/.dsh/.booted-v32
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -12,6 +12,11 @@ if [ ! -f "$MARKER" ]; then
     > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
+
+  # remove leftovers from earlier experiments
+  "$DSH" plugin --profile web remove dsh-telegram-control || true
+  "$DSH" plugin --profile web remove dsh-telegram || true
+  node -e 'const fs=require("fs");const p="/root/.dsh/profiles/web/package.json";const j=JSON.parse(fs.readFileSync(p,"utf8"));const BAD=["dsh-telegram-control","dsh-telegram","@bycall/dsh-answer-reviewer","dsh-answer-reviewer"];if(j.dsh&&j.dsh.profile&&Array.isArray(j.dsh.profile.bundles)){j.dsh.profile.bundles=j.dsh.profile.bundles.filter(b=>!BAD.includes(b));fs.writeFileSync(p,JSON.stringify(j,null,2));console.log("BUNDLES_PRUNED");}' || true
 
   # Telegram bridge (v0.2.3 — the only verified-working version on dsh 0.1.5-rc.2)
   "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel.git#v0.2.3 --allow-build='*' || true
