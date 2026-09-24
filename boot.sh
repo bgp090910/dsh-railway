@@ -125,5 +125,13 @@ if (j.dsh && j.dsh.profile && Array.isArray(j.dsh.profile.bundles)) {
 }
 '
 
+# make the bundle patch file reachable at the expected node_modules path
+mkdir -p /root/.dsh/profiles/web/node_modules/dsh-telegram
+SRC=/root/.dsh/dsh-telegram-src/cordis.patch.yml
+if [ -f "$SRC" ]; then
+  cp "$SRC" /root/.dsh/profiles/web/node_modules/dsh-telegram/cordis.patch.yml
+  echo "PATCH_FILE_COPIED"
+fi
+
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
