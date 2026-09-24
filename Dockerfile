@@ -3,7 +3,7 @@ FROM node:22-slim
 RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates socat python3 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g pnpm @deepseek-ai/dsh@0.1.5-rc.2
+RUN npm install -g pnpm @deepseek-ai/dsh@0.1.7-rc.1
 
 COPY --chmod=0755 boot.sh /boot.sh
 
