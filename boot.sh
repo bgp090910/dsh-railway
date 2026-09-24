@@ -79,4 +79,4 @@ EOF
 echo "DEFAULT_MODEL_READY"
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
-exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app --patch /root/.dsh/default-model.patch.yml
+exec "$DSH" --patch /root/.dsh/default-model.patch.yml web --no-open --trusted-host dsh-production-1e87.up.railway.app
