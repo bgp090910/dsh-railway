@@ -1,14 +1,14 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v38
+MARKER=/root/.dsh/.booted-v39
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
   echo "=== first boot: clean bootstrap (dsh 0.1.5-rc.3) ==="
   mkdir -p /root/.dsh/profiles/web /root/.dsh/workspace
 
-  printf "dangerouslyAllowAllBuilds: true\n" > /root/.dsh/profiles/web/pnpm-workspace.yaml
+  printf "dangerouslyAllowAllBuilds: true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
   # install plugin packages
   "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel.git#v0.2.3 --allow-build='*' || true
