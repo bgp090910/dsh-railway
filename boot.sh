@@ -69,5 +69,10 @@ curl -fsSL "https://raw.githubusercontent.com/YuJunZhiXue/jailbreaks/main/GLM%20
   -o /root/.dsh/prompt-inject.md 2>/dev/null || echo "ZCODE_DOWNLOAD_FAILED"
 [ -s /root/.dsh/prompt-inject.md ] && echo "PROMPT_INJECT_READY"
 
+# print notifier bootstrap pairing code to logs (user pairs via /pair <code>)
+if [ -f /root/.dsh/dsh-notifier/bootstrap-paircode.txt ]; then
+  echo "PAIRCODE: $(cat /root/.dsh/dsh-notifier/bootstrap-paircode.txt)"
+fi
+
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
