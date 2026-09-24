@@ -1,11 +1,11 @@
 #!/bin/sh
-echo "===PURGE_DIAG==="
-echo "--- dsh-purge entry in profile patch ---"
-grep -A 15 "dsh-purge" /root/.dsh/profiles/web/cordis.patch.yml 2>/dev/null | head -20 || echo "not in profile patch"
-echo "--- purge installed in node_modules? ---"
-ls -d /root/.dsh/profiles/web/node_modules/*purge* /root/.dsh/profiles/web/node_modules/.pnpm/*purge* 2>/dev/null || echo "no purge dirs"
-echo "--- prompt-inject.md anywhere ---"
-find /root/.dsh -maxdepth 3 -name "prompt-inject.md" 2>/dev/null || echo "no prompt-inject.md"
-echo "--- dsh home root listing ---"
-ls /root/.dsh/ 2>/dev/null
-echo "===PURGE_DIAG_END==="
+echo "===PURGE_DIAG2==="
+echo "--- purge entry full config ---"
+grep -B2 -A 25 "id: dsh-purge" /root/.dsh/profiles/web/cordis.patch.yml 2>/dev/null | head -35
+echo "--- prompt-inject.md content head ---"
+head -20 /root/.dsh/prompt-inject.md 2>/dev/null || echo "empty/missing"
+echo "--- global dsh node_modules purged? (patched marker) ---"
+ls /usr/local/lib/node_modules/@deepseek-ai/ 2>/dev/null | head -5
+echo "--- profile node_modules @deepseek-ai ---"
+ls /root/.dsh/profiles/web/node_modules/@deepseek-ai/ 2>/dev/null | head -8
+echo "===PURGE_DIAG2_END==="
