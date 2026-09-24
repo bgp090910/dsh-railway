@@ -138,23 +138,20 @@ fi
 node -e '
 const fs = require("fs");
 const f = "/root/.dsh/profiles/web/cordis.patch.yml";
-let lines = fs.readFileSync(f, "utf8").split("\n");
+let lines = fs.readFileSync(f, "utf8").split("\n").filter((l) => !/answer-reviewer/.test(l));
 const out = [];
 for (let i = 0; i < lines.length; i++) {
   const l = lines[i];
-  if (/dsh-answer-reviewer/.test(l)) {
-    if (out[out.length - 1] && out[out.length - 1].trim() === "- insert:") out.pop();
-    i++; // skip the name line
-    continue;
+  if (l.trim() === "- insert:") {
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() === "") j++;
+    if (j >= lines.length || !lines[j].trim().startsWith("-")) continue; // orphan insert
   }
   out.push(l);
 }
 fs.writeFileSync(f, out.join("\n"));
 console.log("REVIEWER_PATCH_KILLED");
 '
-rm -rf /root/.dsh/profiles/web/node_modules/.pnpm/*answer-reviewer* /root/.dsh/profiles/web/node_modules/@bycall 2>/dev/null || true
-rm -rf /root/.dsh/profiles/web/node_modules/dsh-answer-reviewer 2>/dev/null || true
-echo "REVIEWER_KILLED"
 
 # ensure dsh-purge entries exist in the profile patch (tar.gz installs lose them on rebuild)
 PATCH=/root/.dsh/profiles/web/cordis.patch.yml
