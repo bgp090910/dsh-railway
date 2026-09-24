@@ -11,10 +11,7 @@ if [ ! -f "$MARKER" ]; then
   printf "dangerouslyAllowAllBuilds: true\n" \
     > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
-  # remove leftovers from earlier experiments
-  "$DSH" plugin --profile web remove dsh-telegram-control || true
-  "$DSH" plugin --profile web remove dsh-telegram-channel || true
-  "$DSH" plugin --profile web remove dsh-telegram || true
+  # (fresh volume: no leftovers to remove)
 
   # Telegram native bridge (npm 0.2.0 — ships cordis.patch.yml; inject patched below)
   "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
