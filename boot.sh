@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v18
+MARKER=/root/.dsh/.booted-v19
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -22,11 +22,11 @@ if [ ! -f "$MARKER" ]; then
   # missing sandbox plugin referenced by the web profile
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
-  # Telegram native bridge: direct chat, auto session binding (no manual attach)
-  # npm 0.2.0 ships cordis.patch.yml (github repo does not); inject is patched below
+  # Telegram bridge (remote-control style — the only plugin verified working
+  # in this container; dsh-telegram fails activation on dsh 0.1.5-rc seam)
   "$DSH" plugin --profile web remove dsh-telegram || true
   rm -rf /root/.dsh/dsh-telegram-src
-  "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
+  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel --allow-build='*' || true
 
   # remove the old remote-control style plugin
   "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
@@ -109,7 +109,7 @@ node -e '
 const fs = require("fs");
 const p = "/root/.dsh/profiles/web/package.json";
 const j = JSON.parse(fs.readFileSync(p, "utf8"));
-const BAD = ["@kanadego/dsh-heartbeat", "@kenz1117/dsh-engram", "@hi-wenw/dsh-telegram-channel", "@bycall/dsh-answer-reviewer"];
+const BAD = ["@kanadego/dsh-heartbeat", "@kenz1117/dsh-engram", "@hi-wenw/dsh-telegram-channel", "@bycall/dsh-answer-reviewer", "dsh-telegram"];
 if (j.dsh && j.dsh.profile && Array.isArray(j.dsh.profile.bundles)) {
   const before = j.dsh.profile.bundles.length;
   j.dsh.profile.bundles = j.dsh.profile.bundles.filter((b) => !BAD.includes(b));
@@ -132,13 +132,7 @@ if [ -f "$SRC" ]; then
   echo "PATCH_FILE_COPIED"
 fi
 
-# fix dsh-telegram inject list: add 'agent' (required by dsh 0.1.5-rc seam)
-# patch the PLUGIN's bundle file directly (that is what dsh reads at boot)
-TB=/root/.dsh/profiles/web/node_modules/dsh-telegram/cordis.patch.yml
-if [ -f "$TB" ] && ! grep -qE '^[ ]*- agent$' "$TB"; then
-  sed -i '/^[ ]*- agents$/i\        - agent' "$TB"
-  echo "BUNDLE_INJECT_FIXED"
-fi
+# (inject fix for dsh-telegram removed — plugin reverted to telegram-channel)
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
 exec "$DSH" web --no-open --trusted-host dsh-production-1e87.up.railway.app
