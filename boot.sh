@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v39
+MARKER=/root/.dsh/.booted-v40
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -11,7 +11,7 @@ if [ ! -f "$MARKER" ]; then
   printf "dangerouslyAllowAllBuilds: true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" > /root/.dsh/profiles/web/pnpm-workspace.yaml
 
   # install plugin packages
-  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel.git#v0.2.3 --allow-build='*' || true
+  "$DSH" plugin --profile web add dsh-notifier --allow-build='*' || true
   "$DSH" plugin --profile web add https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz --allow-build='*' || true
 
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
