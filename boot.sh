@@ -109,7 +109,7 @@ node -e '
 const fs = require("fs");
 const p = "/root/.dsh/profiles/web/package.json";
 const j = JSON.parse(fs.readFileSync(p, "utf8"));
-const BAD = ["@kanadego/dsh-heartbeat", "@kenz1117/dsh-engram", "@hi-wenw/dsh-telegram-channel", "@bycall/dsh-answer-reviewer", "dsh-telegram"];
+const BAD = ["@kanadego/dsh-heartbeat", "@kenz1117/dsh-engram", "@hi-wenw/dsh-telegram-channel", "@bycall/dsh-answer-reviewer", "dsh-telegram", "dsh-answer-reviewer", "dsh-heartbeat", "dsh-engram"];
 if (j.dsh && j.dsh.profile && Array.isArray(j.dsh.profile.bundles)) {
   const before = j.dsh.profile.bundles.length;
   j.dsh.profile.bundles = j.dsh.profile.bundles.filter((b) => !BAD.includes(b));
