@@ -133,11 +133,11 @@ if [ -f "$SRC" ]; then
 fi
 
 # fix dsh-telegram inject list: add 'agent' (required by dsh 0.1.5-rc seam)
-PATCH=/root/.dsh/profiles/web/cordis.patch.yml
-if grep -q "id: telegram" "$PATCH" && ! grep -q -- "- agent" "$PATCH"; then
-  sed -i '/^- id: telegram$/,+2d' "$PATCH"
-  printf '\n- id: telegram\n  inject:\n    - agent\n    - agents\n    - llm\n    - credentials\n    - userQuestions\n    - agentDefaultModel\n    - attachments\n    - workspaceRegistry\n' >> "$PATCH"
-  echo "TELEGRAM_INJECT_FIXED"
+# patch the PLUGIN's bundle file directly (that is what dsh reads at boot)
+TB=/root/.dsh/profiles/web/node_modules/dsh-telegram/cordis.patch.yml
+if [ -f "$TB" ] && ! grep -qE '^[ ]*- agent$' "$TB"; then
+  sed -i '/^[ ]*- agents$/i\        - agent' "$TB"
+  echo "BUNDLE_INJECT_FIXED"
 fi
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
