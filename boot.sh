@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-MARKER=/root/.dsh/.booted-v41
+MARKER=/root/.dsh/.booted-v42
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -13,6 +13,11 @@ if [ ! -f "$MARKER" ]; then
   # install plugin packages
   "$DSH" plugin --profile web add dsh-notifier --allow-build='*' || true
   "$DSH" plugin --profile web add https://github.com/YuJunZhiXue/dsh-purge/archive/refs/heads/master.tar.gz --allow-build='*' || true
+
+  # remove any legacy telegram plugins that would fight over the bot token
+  "$DSH" plugin --profile web remove dsh-telegram || true
+  "$DSH" plugin --profile web remove dsh-telegram-channel || true
+  node -e 'const fs=require("fs");const p="/root/.dsh/profiles/web/package.json";try{const j=JSON.parse(fs.readFileSync(p,"utf8"));const BAD=["dsh-telegram","dsh-telegram-channel"];if(j.dsh&&j.dsh.profile&&Array.isArray(j.dsh.profile.bundles)){j.dsh.profile.bundles=j.dsh.profile.bundles.filter(b=>!BAD.includes(b));fs.writeFileSync(p,JSON.stringify(j,null,2));console.log("BUNDLES_PRUNED");}}catch(e){console.log("PRUNE_SKIP");}' || true
 
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
 
