@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v10
+MARKER=/root/.dsh/.booted-v11
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -15,6 +15,9 @@ if [ ! -f "$MARKER" ]; then
   # pnpm >=10.9: run all dependency build scripts without approval
   printf "dangerouslyAllowAllBuilds: true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" \
     > /root/.dsh/profiles/web/pnpm-workspace.yaml
+
+  # rebuild cordis.patch.yml from scratch (previous boots corrupted it)
+  rm -f /root/.dsh/profiles/web/cordis.patch.yml
 
   # missing sandbox plugin referenced by the web profile
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
