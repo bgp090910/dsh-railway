@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v16
+MARKER=/root/.dsh/.booted-v18
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -23,11 +23,10 @@ if [ ! -f "$MARKER" ]; then
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-sandbox-local@0.1.5-rc.3 || true
 
   # Telegram native bridge: direct chat, auto session binding (no manual attach)
-  # GitHub tarball build omits cordis.patch.yml (files field) — use link: checkout
+  # npm 0.2.0 ships cordis.patch.yml (github repo does not); inject is patched below
   "$DSH" plugin --profile web remove dsh-telegram || true
   rm -rf /root/.dsh/dsh-telegram-src
-  git clone --depth 1 https://github.com/xqicxx/dsh-telegram.git /root/.dsh/dsh-telegram-src
-  "$DSH" plugin --profile web add link:/root/.dsh/dsh-telegram-src --allow-build='*' || true
+  "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
 
   # remove the old remote-control style plugin
   "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
@@ -131,6 +130,14 @@ SRC=/root/.dsh/dsh-telegram-src/cordis.patch.yml
 if [ -f "$SRC" ]; then
   cp "$SRC" /root/.dsh/profiles/web/node_modules/dsh-telegram/cordis.patch.yml
   echo "PATCH_FILE_COPIED"
+fi
+
+# fix dsh-telegram inject list: add 'agent' (required by dsh 0.1.5-rc seam)
+PATCH=/root/.dsh/profiles/web/cordis.patch.yml
+if grep -q "id: telegram" "$PATCH" && ! grep -q -- "- agent" "$PATCH"; then
+  sed -i '/^- id: telegram$/,+2d' "$PATCH"
+  printf '\n- id: telegram\n  inject:\n    - agent\n    - agents\n    - llm\n    - credentials\n    - userQuestions\n    - agentDefaultModel\n    - attachments\n    - workspaceRegistry\n' >> "$PATCH"
+  echo "TELEGRAM_INJECT_FIXED"
 fi
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
