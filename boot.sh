@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v9
+MARKER=/root/.dsh/.booted-v10
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -31,14 +31,16 @@ if [ ! -f "$MARKER" ]; then
   # Long-term cross-session memory (engram's prepare script is broken on pnpm 11; use dsh-memory instead)
   "$DSH" plugin --profile web add github:FuRongJun-1999/dsh-memory --allow-build='*' || true
 
-  # Autonomous heartbeat tasks
-  "$DSH" plugin --profile web add github:Kanadego/dsh-heartbeat --allow-build='*' || true
-
-  # Answer quality reviewer
-  "$DSH" plugin --profile web add github:bycall/dsh-answer-reviewer --allow-build='*' || true
+  # Autonomous heartbeat tasks — removed (Windows-only plugin, useless on Linux)
+  # Answer quality reviewer — removed (3987 config server breaks in container; not needed)
 
   # Prompt optimizer
   "$DSH" plugin --profile web add github:1321928757/dsh-prompt-polish --allow-build='*' || true
+
+  # Remove plugins that break in the container / are useless here
+  "$DSH" plugin --profile web remove github:bycall/dsh-answer-reviewer || true
+  "$DSH" plugin --profile web remove github:Kanadego/dsh-heartbeat || true
+  "$DSH" plugin --profile web remove github:kenz1117/dsh-engram || true
 
   # production: patchReload startup (no HMR)
   cd /root/.dsh/profiles/web && node -e "const fs=require('fs');const p='package.json';const j=JSON.parse(fs.readFileSync(p));j.dsh=j.dsh||{};j.dsh.profile=j.dsh.profile||{};j.dsh.profile.patchReload='startup';fs.writeFileSync(p,JSON.stringify(j,null,2));console.log('patchReload=startup')"
