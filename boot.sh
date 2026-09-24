@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v24
+MARKER=/root/.dsh/.booted-v26
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -25,11 +25,11 @@ if [ ! -f "$MARKER" ]; then
   # apiProxy host service (telegram-channel waits on it; missing from profile deps)
   cd /root/.dsh/profiles/web && pnpm add @deepseek-ai/dsh-host-apiproxy@0.1.5-rc.2 || true
 
-  # Telegram bridge (remote-control style) — v0.2.3: pre-apiProxy version
-  # (0.3.x requires apiProxy seam that dsh 0.1.5-rc.2 removed)
-  "$DSH" plugin --profile web remove dsh-telegram || true
+  # Telegram NATIVE bridge: direct chat, auto session creation (no binding)
+  "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
+  "$DSH" plugin --profile web remove dsh-telegram-channel || true
   rm -rf /root/.dsh/dsh-telegram-src
-  "$DSH" plugin --profile web add github:hi-wenw/dsh-telegram-channel.git#v0.2.3 --allow-build='*' || true
+  "$DSH" plugin --profile web add dsh-telegram --allow-build='*' || true
 
   # remove the old remote-control style plugin
   "$DSH" plugin --profile web remove github:hi-wenw/dsh-telegram-channel || true
@@ -164,12 +164,11 @@ if ! grep -q "id: dsh-purge" "$PATCH"; then
   echo "PURGE_PATCH_RESTORED"
 fi
 
-# telegram-channel waits forever on apiProxy (removed seam in dsh 0.1.5-rc)
-# strip the inject line so the plugin activates; /model falls back gracefully
-TB=/root/.dsh/profiles/web/node_modules/dsh-telegram-channel/cordis.patch.yml
-if [ -f "$TB" ]; then
-  sed -i '/apiProxy/d' "$TB"
-  echo "APIPROXY_INJECT_REMOVED"
+# dsh-telegram (native bridge) needs 'agent' injected — patch its bundle file
+TB=/root/.dsh/profiles/web/node_modules/dsh-telegram/cordis.patch.yml
+if [ -f "$TB" ] && ! grep -qE '^[ ]*- agent$' "$TB"; then
+  sed -i '/^[ ]*- agents$/i\        - agent' "$TB"
+  echo "AGENT_INJECT_ADDED"
 fi
 
 socat TCP-LISTEN:8080,fork,reuseaddr TCP:127.0.0.1:3080 &
