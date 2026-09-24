@@ -7,7 +7,7 @@ RUN npm install -g pnpm @deepseek-ai/dsh@0.1.5-rc.2
 
 COPY --chmod=0755 boot.sh /boot.sh
 
-WORKDIR /root
+WORKDIR /root/.dsh/workspace
 
 EXPOSE 3080 8080
 ENTRYPOINT ["/boot.sh"]

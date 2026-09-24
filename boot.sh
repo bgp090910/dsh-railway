@@ -10,7 +10,7 @@ DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
   echo "=== first boot: bootstrapping persistent dsh home ==="
-  mkdir -p /root/.dsh/profiles/web
+  mkdir -p /root/.dsh/profiles/web /root/.dsh/workspace
 
   # pnpm >=10.9: run all dependency build scripts without approval
   printf "dangerouslyAllowAllBuilds: true\noverrides:\n  '@deepseek-ai/dsh-type-meta': 'npm:@deepseek-ai/dsh-brand@0.1.7-rc.1'\n" \
