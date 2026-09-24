@@ -5,7 +5,7 @@ set -eu
 # Idempotent: later restarts/redeploys keep plugins, credentials,
 # settings, and bound sessions on the mounted volume.
 
-MARKER=/root/.dsh/.booted-v8
+MARKER=/root/.dsh/.booted-v9
 DSH=/usr/local/bin/dsh
 
 if [ ! -f "$MARKER" ]; then
@@ -28,8 +28,8 @@ if [ ! -f "$MARKER" ]; then
   # Plugin market (further plugins one-click from the Web UI)
   "$DSH" plugin --profile web add dshmarket --allow-build='*' || true
 
-  # Long-term cross-session memory
-  "$DSH" plugin --profile web add github:kenz1117/dsh-engram --allow-build='*' || true
+  # Long-term cross-session memory (engram's prepare script is broken on pnpm 11; use dsh-memory instead)
+  "$DSH" plugin --profile web add github:FuRongJun-1999/dsh-memory --allow-build='*' || true
 
   # Autonomous heartbeat tasks
   "$DSH" plugin --profile web add github:Kanadego/dsh-heartbeat --allow-build='*' || true
